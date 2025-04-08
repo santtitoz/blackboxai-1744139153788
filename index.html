@@ -131,19 +131,75 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-black text-white py-8">
+    <!-- Contact Footer -->
+    <footer class="bg-black text-white py-12">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <h3 class="text-2xl font-bold">BarberStyle</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">BarberStyle</h3>
                     <p class="mt-2">O melhor em estilo e cuidados masculinos</p>
+                    <div class="mt-4">
+                        <p class="flex items-center mb-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Rua Example, 123 - Centro
+                        </p>
+                        <p class="flex items-center mb-2">
+                            <i class="fas fa-phone mr-2"></i>
+                            (11) 99999-9999
+                        </p>
+                        <p class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            contato@barberstyle.com
+                        </p>
+                    </div>
                 </div>
-                <div class="flex space-x-4">
-                    <a href="#" class="hover:text-yellow-500"><i class="fab fa-instagram text-2xl"></i></a>
-                    <a href="#" class="hover:text-yellow-500"><i class="fab fa-facebook text-2xl"></i></a>
-                    <a href="#" class="hover:text-yellow-500"><i class="fab fa-whatsapp text-2xl"></i></a>
+
+                <!-- Opening Hours -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Horário de Funcionamento</h4>
+                    <ul class="space-y-2">
+                        <li class="flex justify-between">
+                            <span>Segunda - Sexta</span>
+                            <span>09:00 - 20:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Sábado</span>
+                            <span>09:00 - 18:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Domingo</span>
+                            <span>Fechado</span>
+                        </li>
+                    </ul>
                 </div>
+
+                <!-- Social Media & Contact -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Redes Sociais</h4>
+                    <div class="flex space-x-4 mb-6">
+                        <a href="#" class="hover:text-yellow-500 transition">
+                            <i class="fab fa-instagram text-3xl"></i>
+                        </a>
+                        <a href="#" class="hover:text-yellow-500 transition">
+                            <i class="fab fa-facebook text-3xl"></i>
+                        </a>
+                        <a href="#" class="hover:text-yellow-500 transition">
+                            <i class="fab fa-whatsapp text-3xl"></i>
+                        </a>
+                    </div>
+                    <div class="mt-4">
+                        <a href="https://wa.me/5511999999999" class="bg-yellow-500 text-black px-6 py-3 rounded-full font-semibold hover:bg-yellow-600 transition flex items-center justify-center">
+                            <i class="fab fa-whatsapp mr-2"></i>
+                            Agendar via WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p>&copy; 2024 BarberStyle. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
