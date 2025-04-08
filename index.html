@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberStyle - Agendamento & Barbearia</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="font-[Poppins] bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-black text-white py-4 fixed w-full z-50">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold">BarberStyle</a>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-yellow-500 transition">Home</a>
+                <a href="#services" class="hover:text-yellow-500 transition">Serviços</a>
+                <a href="#portfolio" class="hover:text-yellow-500 transition">Portfólio</a>
+                <a href="#booking" class="hover:text-yellow-500 transition">Agendamento</a>
+                <a href="dashboard.html" class="hover:text-yellow-500 transition">Dashboard</a>
+            </div>
+            <button class="md:hidden">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-20 bg-black text-white">
+        <div class="container mx-auto px-4 py-20">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6">Estilo & Precisão</h1>
+                    <p class="text-xl mb-8">Transforme seu visual com os melhores profissionais da cidade.</p>
+                    <a href="#booking" class="bg-yellow-500 text-black px-8 py-3 rounded-full font-semibold hover:bg-yellow-600 transition">Agendar Agora</a>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://images.pexels.com/photos/1805600/pexels-photo-1805600.jpeg" alt="Barber Shop" class="rounded-lg shadow-xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Nossos Serviços</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <i class="fas fa-cut text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Corte de Cabelo</h3>
+                    <p class="text-gray-600">Cortes modernos e clássicos para todos os estilos</p>
+                    <p class="text-yellow-500 font-bold mt-4">R$ 45,00</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <i class="fas fa-razor text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Barba</h3>
+                    <p class="text-gray-600">Modelagem e aparação profissional</p>
+                    <p class="text-yellow-500 font-bold mt-4">R$ 35,00</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <i class="fas fa-spray-can text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Tratamentos</h3>
+                    <p class="text-gray-600">Hidratação e cuidados especiais</p>
+                    <p class="text-yellow-500 font-bold mt-4">R$ 60,00</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 bg-gray-900 text-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Nosso Trabalho</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Portfolio images will be dynamically loaded -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Faça seu Agendamento</h2>
+            <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <form id="bookingForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                            Nome Completo
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="service">
+                            Serviço
+                        </label>
+                        <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="service" required>
+                            <option value="">Selecione um serviço</option>
+                            <option value="haircut">Corte de Cabelo</option>
+                            <option value="beard">Barba</option>
+                            <option value="treatment">Tratamento</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="date">
+                            Data
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="date" type="date" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="time">
+                            Horário
+                        </label>
+                        <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="time" required>
+                            <option value="">Selecione um horário</option>
+                            <!-- Time slots will be dynamically loaded -->
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <button class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full" type="submit">
+                            Agendar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-2xl font-bold">BarberStyle</h3>
+                    <p class="mt-2">O melhor em estilo e cuidados masculinos</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-yellow-500"><i class="fab fa-instagram text-2xl"></i></a>
+                    <a href="#" class="hover:text-yellow-500"><i class="fab fa-facebook text-2xl"></i></a>
+                    <a href="#" class="hover:text-yellow-500"><i class="fab fa-whatsapp text-2xl"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
