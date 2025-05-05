@@ -1,4 +1,3 @@
-// Portfolio Gallery Images
 const portfolioImages = [
     'https://images.pexels.com/photos/1805600/pexels-photo-1805600.jpeg',
     'https://images.pexels.com/photos/1319461/pexels-photo-1319461.jpeg',
@@ -10,7 +9,9 @@ const portfolioImages = [
     'https://images.pexels.com/photos/2809652/pexels-photo-2809652.jpeg'
 ];
 
-// Load portfolio images
+// API base URL
+const API_BASE_URL = 'http://localhost:3000/api';
+
 document.addEventListener('DOMContentLoaded', () => {
     const portfolioGrid = document.querySelector('#portfolio .grid');
     
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         portfolioGrid.appendChild(div);
     });
 
-    // Initialize booking form
+    initializeAuth();
     initializeBookingForm();
     
     // Mobile menu functionality
@@ -32,6 +33,102 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileMenu.classList.toggle('hidden');
     });
 });
+
+function initializeAuth() {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showRegisterBtn = document.getElementById('showRegister');
+    const showLoginBtn = document.getElementById('showLogin');
+    const authForms = document.getElementById('authForms');
+    const bookingFormContainer = document.getElementById('bookingFormContainer');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Show register form
+    showRegisterBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+    });
+
+    // Show login form
+    showLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+    });
+
+    // Login form submit
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
+                showNotification('Login realizado com sucesso!');
+                authForms.classList.add('hidden');
+                bookingFormContainer.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                showNotification(data.message || 'Erro no login', true);
+            }
+        } catch (error) {
+            showNotification('Erro na conexão com o servidor', true);
+        }
+    });
+
+    // Register form submit
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('registerUsername').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value.trim();
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showNotification('Cadastro realizado com sucesso! Faça login.');
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            } else {
+                showNotification(data.message || 'Erro no cadastro', true);
+            }
+        } catch (error) {
+            showNotification('Erro na conexão com o servidor', true);
+        }
+    });
+
+    // Logout button
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        authForms.classList.remove('hidden');
+        bookingFormContainer.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        showNotification('Logout realizado com sucesso!');
+    });
+
+    // Check if user is already logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+        authForms.classList.add('hidden');
+        bookingFormContainer.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+    }
+}
 
 function initializeBookingForm() {
     const form = document.getElementById('bookingForm');
@@ -47,9 +144,15 @@ function initializeBookingForm() {
     });
 
     // Handle form submission
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showNotification('Você precisa estar logado para agendar.', true);
+            return;
+        }
+
         const formData = {
             name: document.getElementById('name').value,
             service: document.getElementById('service').value,
@@ -57,14 +160,25 @@ function initializeBookingForm() {
             time: document.getElementById('time').value
         };
 
-        // Store appointment in localStorage
-        saveAppointment(formData);
-        
-        // Show success message
-        showNotification('Agendamento realizado com sucesso!');
-        
-        // Reset form
-        form.reset();
+        try {
+            const res = await fetch(`${API_BASE_URL}/appointments`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showNotification('Agendamento realizado com sucesso!');
+                form.reset();
+            } else {
+                showNotification(data.message || 'Erro ao agendar', true);
+            }
+        } catch (error) {
+            showNotification('Erro na conexão com o servidor', true);
+        }
     });
 
     // Set minimum date to today
@@ -84,19 +198,9 @@ function generateTimeSlots() {
     return slots;
 }
 
-function saveAppointment(appointment) {
-    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-    appointments.push({
-        ...appointment,
-        id: Date.now(),
-        status: 'pending'
-    });
-    localStorage.setItem('appointments', JSON.stringify(appointments));
-}
-
-function showNotification(message) {
+function showNotification(message, isError = false) {
     const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg fade-in';
+    notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg fade-in ${isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`;
     notification.textContent = message;
     document.body.appendChild(notification);
     
