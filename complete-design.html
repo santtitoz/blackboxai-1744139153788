@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberStyle - Agendamento & Barbearia</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .transition {
+            transition: all 0.3s ease;
+        }
+
+        /* Calendar styles */
+        .calendar-time-slot {
+            @apply flex items-center border-b py-2 px-4;
+        }
+
+        .calendar-time-slot:hover {
+            @apply bg-gray-50;
+        }
+
+        .appointment-card {
+            @apply bg-yellow-100 rounded p-2 my-1 cursor-pointer transition-all hover:bg-yellow-200;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* Portfolio gallery */
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Color Scheme */
+        :root {
+            --primary-color: #F59E0B; /* Yellow 500 */
+            --secondary-color: #111827; /* Gray 900 */
+            --accent-color: #4B5563; /* Gray 600 */
+            --text-light: #F3F4F6; /* Gray 100 */
+            --text-dark: #1F2937; /* Gray 800 */
+        }
+
+        /* Typography Scale */
+        .text-display {
+            font-size: 4rem;
+            line-height: 1.1;
+            font-weight: 700;
+        }
+
+        .text-h1 {
+            font-size: 3rem;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .text-h2 {
+            font-size: 2.25rem;
+            line-height: 1.3;
+            font-weight: 600;
+        }
+
+        /* Spacing System */
+        .section-spacing {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .container-padding {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        /* Component Styles */
+        .btn-primary {
+            @apply bg-yellow-500 text-black px-8 py-3 rounded-full font-semibold 
+                   hover:bg-yellow-600 transition-all duration-300 
+                   transform hover:scale-105;
+        }
+
+        .card {
+            @apply bg-white rounded-lg shadow-lg p-6 
+                   transform transition-all duration-300 
+                   hover:shadow-xl hover:-translate-y-1;
+        }
+
+        .input-field {
+            @apply w-full px-4 py-2 rounded-lg border border-gray-300 
+                   focus:ring-2 focus:ring-yellow-500 focus:border-transparent 
+                   transition-all duration-300;
+        }
+
+        /* Responsive Design Breakpoints */
+        @media (max-width: 640px) {
+            .text-display {
+                font-size: 2.5rem;
+            }
+            
+            .text-h1 {
+                font-size: 2rem;
+            }
+            
+            .text-h2 {
+                font-size: 1.75rem;
+            }
+            
+            .section-spacing {
+                padding-top: 3rem;
+                padding-bottom: 3rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-black text-white py-4 fixed w-full z-50">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold">BarberStyle</a>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-yellow-500 transition">Home</a>
+                <a href="#services" class="hover:text-yellow-500 transition">Serviços</a>
+                <a href="#portfolio" class="hover:text-yellow-500 transition">Portfólio</a>
+                <a href="#booking" class="hover:text-yellow-500 transition">Agendamento</a>
+                <a href="#dashboard" class="hover:text-yellow-500 transition">Dashboard</a>
+            </div>
+            <button class="md:hidden">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-20 bg-black text-white">
+        <div class="container mx-auto px-4 py-20">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6">Estilo & Precisão</h1>
+                    <p class="text-xl mb-8">Transforme seu visual com os melhores profissionais da cidade.</p>
+                    <a href="#booking" class="btn-primary">Agendar Agora</a>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://images.pexels.com/photos/1805600/pexels-photo-1805600.jpeg" alt="Barber Shop" class="rounded-lg shadow-xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="section-spacing">
+        <div class="container mx-auto px-4">
+            <h2 class="text-h2 text-center mb-12">Nossos Serviços</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card">
+                    <i class="fas fa-cut text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Corte de Cabelo</h3>
+                    <p class="text-gray-600">Cortes modernos e clássicos para todos os estilos</p>
+                    <p class="text-yellow-500 font-bold mt-4">R$ 45,00</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-razor text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Barba</h3>
+                    <p class="text-gray-600">Modelagem e aparação profissional</p>
+                    <p class="text-yellow-500 font-bold mt-4">R$ 35,00</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-spray-can text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Tratamentos</h3>
+                    <p class="text-gray-600">Hidratação e cuidados especiais</p>
+                    <p class="text-yellow-500 font-bold mt-4">R$ 60,00</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="section-spacing bg-gray-900 text-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-h2 text-center mb-12">Nosso Trabalho</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="gallery-item">
+                    <img src="https://images.pexels.com/photos/1805600/pexels-photo-1805600.jpeg" alt="Portfolio">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.pexels.com/photos/1319461/pexels-photo-1319461.jpeg" alt="Portfolio">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.pexels.com/photos/1570807/pexels-photo-1570807.jpeg" alt="Portfolio">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.pexels.com/photos/1453006/pexels-photo-1453006.jpeg" alt="Portfolio">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="section-spacing">
+        <div class="container mx-auto px-4">
+            <h2 class="text-h2 text-center mb-12">Faça seu Agendamento</h2>
+            <div class="max-w-md mx-auto card">
+                <form id="bookingForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                            Nome Completo
+                        </label>
+                        <input class="input-field" id="name" type="text" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="service">
+                            Serviço
+                        </label>
+                        <select class="input-field" id="service" required>
+                            <option value="">Selecione um serviço</option>
+                            <option value="haircut">Corte de Cabelo</option>
+                            <option value="beard">Barba</option>
+                            <option value="treatment">Tratamento</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="date">
+                            Data
+                        </label>
+                        <input class="input-field" id="date" type="date" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="time">
+                            Horário
+                        </label>
+                        <select class="input-field" id="time" required>
+                            <option value="">Selecione um horário</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary w-full">
+                        Agendar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Footer -->
+    <footer class="bg-black text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">BarberStyle</h3>
+                    <p class="mt-2">O melhor em estilo e cuidados masculinos</p>
+                    <div class="mt-4">
+                        <p class="flex items-center mb-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Rua Example, 123 - Centro
+                        </p>
+                        <p class="flex items-center mb-2">
+                            <i class="fas fa-phone mr-2"></i>
+                            (11) 99999-9999
+                        </p>
+                        <p class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            contato@barberstyle.com
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Opening Hours -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Horário de Funcionamento</h4>
+                    <ul class="space-y-2">
+                        <li class="flex justify-between">
+                            <span>Segunda - Sexta</span>
+                            <span>09:00 - 20:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Sábado</span>
+                            <span>09:00 - 18:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Domingo</span>
+                            <span>Fechado</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Social Media & Contact -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Redes Sociais</h4>
+                    <div class="flex space-x-4 mb-6">
+                        <a href="#" class="hover:text-yellow-500 transition">
+                            <i class="fab fa-instagram text-3xl"></i>
+                        </a>
+                        <a href="#" class="hover:text-yellow-500 transition">
+                            <i class="fab fa-facebook text-3xl"></i>
+                        </a>
+                        <a href="#" class="hover:text-yellow-500 transition">
+                            <i class="fab fa-whatsapp text-3xl"></i>
+                        </a>
+                    </div>
+                    <div class="mt-4">
+                        <a href="https://wa.me/5511999999999" class="btn-primary flex items-center justify-center">
+                            <i class="fab fa-whatsapp mr-2"></i>
+                            Agendar via WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p>&copy; 2024 BarberStyle. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Portfolio Gallery Images
+        const portfolioImages = [
+            'https://images.pexels.com/photos/1805600/pexels-photo-1805600.jpeg',
+            'https://images.pexels.com/photos/1319461/pexels-photo-1319461.jpeg',
+            'https://images.pexels.com/photos/1570807/pexels-photo-1570807.jpeg',
+            'https://images.pexels.com/photos/1453006/pexels-photo-1453006.jpeg',
+            'https://images.pexels.com/photos/1804429/pexels-photo-1804429.jpeg',
+            'https://images.pexels.com/photos/2076930/pexels-photo-2076930.jpeg',
+            'https://images.pexels.com/photos/1813272/pexels-photo-1813272.jpeg',
+            'https://images.pexels.com/photos/2809652/pexels-photo-2809652.jpeg'
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeBookingForm();
+            loadPortfolioImages();
+            setupMobileMenu();
+        });
+
+        function initializeBookingForm() {
+            const form = document.getElementById('bookingForm');
+            const timeSelect = document.getElementById('time');
+            
+            // Populate time slots
+            const timeSlots = generateTimeSlots();
+            timeSlots.forEach(time => {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = time;
+                timeSelect.appendChild(option);
+            });
+
+            // Set minimum date to today
+            const dateInput = document.getElementById('date');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+
+            // Handle form submission
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('name').value,
+                    service: document.getElementById('service').value,
+                    date: document.getElementById('date').value,
+                    time: document.getElementById('time').value
+                };
+
+                // Store appointment
+                saveAppointment(formData);
+                
+                // Show success message
+                showNotification('Agendamento realizado com sucesso!');
+                
+                // Reset form
+                form.reset();
+            });
+        }
+
+        function generateTimeSlots() {
+            const slots = [];
+            for (let hour = 9; hour <= 19; hour++) {
+                slots.push(`${hour.toString().padStart(2, '0')}:00`);
+                if (hour !== 19) {
+                    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+                }
+            }
+            return slots;
+        }
+
+        function loadPortfolioImages() {
+            const portfolioGrid = document.querySelector('#portfolio .grid');
+            portfolioImages.forEach(imageUrl => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.innerHTML = `<img src="${imageUrl}" alt="Portfolio" class="w-full h-64 object-cover rounded-lg">`;
+                portfolioGrid.appendChild(div);
+            });
+        }
+
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.querySelector('nav button');
+            const mobileMenu = document.querySelector('nav .md\\:flex');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        function saveAppointment(appointment) {
+            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            appointments.push({
+                ...appointment,
+                id: Date.now(),
+                status: 'pending'
+            });
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg fade-in';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
