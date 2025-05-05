@@ -1,5 +1,8 @@
-// Dashboard functionality
+// API base URL
+const API_BASE_URL = 'http://localhost:3000/api';
+
 document.addEventListener('DOMContentLoaded', () => {
+    initializeAuth();
     initializeCalendar();
     loadTodayAppointments();
     setupViewToggle();
@@ -7,6 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentDate = new Date();
 let currentView = 'week'; // 'week' or 'month'
+let userRole = null;
+let authToken = null;
+
+function initializeAuth() {
+    authToken = localStorage.getItem('token');
+    userRole = localStorage.getItem('role');
+    if (!authToken) {
+        alert('Você precisa estar logado para acessar o dashboard.');
+        window.location.href = 'index.html';
+    }
+}
 
 function initializeCalendar() {
     updateCalendarHeader();
@@ -72,7 +86,26 @@ function updateCalendarHeader() {
     document.getElementById('currentMonth').textContent = headerText;
 }
 
-function renderWeekView() {
+async function fetchAppointments() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/appointments`, {
+            headers: {
+                'Authorization': 'Bearer ' + authToken
+            }
+        });
+        if (!res.ok) throw new Error('Failed to fetch appointments');
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        alert('Erro ao carregar agendamentos. Faça login novamente.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        window.location.href = 'index.html';
+        return [];
+    }
+}
+
+async function renderWeekView() {
     const weekViewCalendar = document.getElementById('weekViewCalendar');
     weekViewCalendar.innerHTML = '';
 
@@ -97,6 +130,8 @@ function renderWeekView() {
     }
     weekViewCalendar.appendChild(weekHeader);
 
+    const appointments = await fetchAppointments();
+
     // Create time slots
     const timeSlots = generateTimeSlots();
     timeSlots.forEach(time => {
@@ -115,14 +150,28 @@ function renderWeekView() {
             day.setDate(startOfWeek.getDate() + i);
             const slot = document.createElement('div');
             slot.className = 'py-2 px-4 text-center';
-            
+
             // Check if there's an appointment for this slot
-            const appointment = getAppointmentForSlot(day, time);
+            const appointment = appointments.find(app => {
+                const appDate = new Date(app.date);
+                return appDate.getDate() === day.getDate() &&
+                       appDate.getMonth() === day.getMonth() &&
+                       appDate.getFullYear() === day.getFullYear() &&
+                       app.time === time;
+            });
+
             if (appointment) {
                 slot.innerHTML = `
                     <div class="appointment-card">
                         <div class="font-semibold">${appointment.name}</div>
                         <div class="text-sm">${appointment.service}</div>
+                        <div class="text-xs mt-1">Status: ${appointment.status}</div>
+                        ${userRole === 'admin' ? `
+                        <div class="mt-2 space-x-2">
+                            <button class="btn-confirm bg-green-500 text-white px-2 py-1 rounded text-xs" data-id="${appointment.id}">Confirmar</button>
+                            <button class="btn-cancel bg-red-500 text-white px-2 py-1 rounded text-xs" data-id="${appointment.id}">Cancelar</button>
+                            <button class="btn-delete bg-gray-700 text-white px-2 py-1 rounded text-xs" data-id="${appointment.id}">Excluir</button>
+                        </div>` : ''}
                     </div>
                 `;
             }
@@ -130,9 +179,13 @@ function renderWeekView() {
         }
         weekViewCalendar.appendChild(row);
     });
+
+    if (userRole === 'admin') {
+        setupAdminButtons();
+    }
 }
 
-function renderMonthView() {
+async function renderMonthView() {
     const monthViewCalendar = document.getElementById('monthViewCalendar');
     monthViewCalendar.innerHTML = '';
 
@@ -152,6 +205,8 @@ function renderMonthView() {
         monthGrid.appendChild(dayHeader);
     });
 
+    const appointments = await fetchAppointments();
+
     // Fill in empty days from previous month
     for (let i = 0; i < firstDay.getDay(); i++) {
         const emptyDay = document.createElement('div');
@@ -170,11 +225,25 @@ function renderMonthView() {
         dayCell.appendChild(dateHeader);
 
         // Add appointments for this day
-        const appointments = getAppointmentsForDay(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
-        appointments.forEach(appointment => {
+        const dayAppointments = appointments.filter(app => {
+            const appDate = new Date(app.date);
+            return appDate.getDate() === day &&
+                   appDate.getMonth() === currentDate.getMonth() &&
+                   appDate.getFullYear() === currentDate.getFullYear();
+        });
+
+        dayAppointments.forEach(appointment => {
             const appointmentDiv = document.createElement('div');
             appointmentDiv.className = 'appointment-card text-xs';
-            appointmentDiv.textContent = `${appointment.time} - ${appointment.name}`;
+            appointmentDiv.innerHTML = `
+                ${appointment.time} - ${appointment.name} (${appointment.status})
+                ${userRole === 'admin' ? `
+                <div class="mt-1 space-x-1">
+                    <button class="btn-confirm bg-green-500 text-white px-1 py-0.5 rounded text-xs" data-id="${appointment.id}">Confirmar</button>
+                    <button class="btn-cancel bg-red-500 text-white px-1 py-0.5 rounded text-xs" data-id="${appointment.id}">Cancelar</button>
+                    <button class="btn-delete bg-gray-700 text-white px-1 py-0.5 rounded text-xs" data-id="${appointment.id}">Excluir</button>
+                </div>` : ''}
+            `;
             dayCell.appendChild(appointmentDiv);
         });
 
@@ -182,31 +251,52 @@ function renderMonthView() {
     }
 
     monthViewCalendar.appendChild(monthGrid);
+
+    if (userRole === 'admin') {
+        setupAdminButtons();
+    }
 }
 
-function loadTodayAppointments() {
+async function loadTodayAppointments() {
     const todayAppointments = document.getElementById('todayAppointments');
-    const appointments = getAppointmentsForDay(new Date());
+    todayAppointments.innerHTML = '';
+    const appointments = await fetchAppointments();
 
-    if (appointments.length === 0) {
+    const today = new Date();
+    const todaysAppointments = appointments.filter(app => {
+        const appDate = new Date(app.date);
+        return appDate.getDate() === today.getDate() &&
+               appDate.getMonth() === today.getMonth() &&
+               appDate.getFullYear() === today.getFullYear();
+    });
+
+    if (todaysAppointments.length === 0) {
         todayAppointments.innerHTML = '<div class="p-4 text-gray-500">Nenhum agendamento para hoje</div>';
         return;
     }
 
-    appointments.forEach(appointment => {
+    todaysAppointments.forEach(appointment => {
         const appointmentDiv = document.createElement('div');
-        appointmentDiv.className = 'p-4 hover:bg-gray-50';
+        appointmentDiv.className = 'p-4 hover:bg-gray-50 flex justify-between items-center';
         appointmentDiv.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div>
-                    <h5 class="font-semibold">${appointment.time} - ${appointment.name}</h5>
-                    <p class="text-sm text-gray-600">${appointment.service}</p>
-                </div>
-                <span class="status-${appointment.status}">${getStatusText(appointment.status)}</span>
+            <div>
+                <h5 class="font-semibold">${appointment.time} - ${appointment.name}</h5>
+                <p class="text-sm text-gray-600">${appointment.service}</p>
+                <p class="text-xs mt-1">Status: ${appointment.status}</p>
             </div>
+            ${userRole === 'admin' ? `
+            <div class="space-x-2">
+                <button class="btn-confirm bg-green-500 text-white px-2 py-1 rounded text-xs" data-id="${appointment.id}">Confirmar</button>
+                <button class="btn-cancel bg-red-500 text-white px-2 py-1 rounded text-xs" data-id="${appointment.id}">Cancelar</button>
+                <button class="btn-delete bg-gray-700 text-white px-2 py-1 rounded text-xs" data-id="${appointment.id}">Excluir</button>
+            </div>` : ''}
         `;
         todayAppointments.appendChild(appointmentDiv);
     });
+
+    if (userRole === 'admin') {
+        setupAdminButtons();
+    }
 }
 
 function generateTimeSlots() {
@@ -220,32 +310,70 @@ function generateTimeSlots() {
     return slots;
 }
 
-function getAppointmentForSlot(date, time) {
-    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-    return appointments.find(appointment => {
-        const appointmentDate = new Date(appointment.date);
-        return appointmentDate.getDate() === date.getDate() &&
-               appointmentDate.getMonth() === date.getMonth() &&
-               appointmentDate.getFullYear() === date.getFullYear() &&
-               appointment.time === time;
+function setupAdminButtons() {
+    document.querySelectorAll('.btn-confirm').forEach(button => {
+        button.addEventListener('click', () => updateAppointmentStatus(button.dataset.id, 'confirmed'));
+    });
+    document.querySelectorAll('.btn-cancel').forEach(button => {
+        button.addEventListener('click', () => updateAppointmentStatus(button.dataset.id, 'cancelled'));
+    });
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', () => deleteAppointment(button.dataset.id));
     });
 }
 
-function getAppointmentsForDay(date) {
-    const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-    return appointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.date);
-        return appointmentDate.getDate() === date.getDate() &&
-               appointmentDate.getMonth() === date.getMonth() &&
-               appointmentDate.getFullYear() === date.getFullYear();
-    }).sort((a, b) => a.time.localeCompare(b.time));
+async function updateAppointmentStatus(id, status) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify({ status })
+        });
+        if (!res.ok) throw new Error('Failed to update appointment');
+        showNotification('Status do agendamento atualizado!');
+        refreshDashboard();
+    } catch (error) {
+        showNotification('Erro ao atualizar agendamento', true);
+    }
 }
 
-function getStatusText(status) {
-    const statusMap = {
-        'pending': 'Pendente',
-        'confirmed': 'Confirmado',
-        'cancelled': 'Cancelado'
-    };
-    return statusMap[status] || status;
+async function deleteAppointment(id) {
+    if (!confirm('Tem certeza que deseja excluir este agendamento?')) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/appointments/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + authToken
+            }
+        });
+        if (!res.ok) throw new Error('Failed to delete appointment');
+        showNotification('Agendamento excluído com sucesso!');
+        refreshDashboard();
+    } catch (error) {
+        showNotification('Erro ao excluir agendamento', true);
+    }
 }
+
+function showNotification(message, isError = false) {
+    const notification = document.createElement('div');
+    notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg fade-in ${isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function refreshDashboard() {
+    if (currentView === 'week') {
+        renderWeekView();
+    } else {
+        renderMonthView();
+    }
+    loadTodayAppointments();
+}
+</create_file>
