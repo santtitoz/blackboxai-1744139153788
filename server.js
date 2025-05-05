@@ -4,12 +4,16 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
+const path = require('path');
 const app = express();
 const PORT = 3000;
 const JWT_SECRET = 'your_jwt_secret_here'; // Change this to a secure secret in production
 
 app.use(cors());
 app.use(express.json());
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '/')));
 
 // Initialize SQLite database
 let db;
