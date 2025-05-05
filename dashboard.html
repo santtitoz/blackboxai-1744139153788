@@ -33,6 +33,7 @@
                 <a href="index.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-800">
                     <i class="fas fa-home mr-2"></i>Voltar ao Site
                 </a>
+                <button id="logoutBtn" class="mt-4 w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600 transition">Sair</button>
             </nav>
         </aside>
 
@@ -93,5 +94,13 @@
     </div>
 
     <script src="dashboard.js"></script>
+    <script>
+        // Logout button functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            window.location.href = 'index.html';
+        });
+    </script>
 </body>
 </html>
